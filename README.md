@@ -2,7 +2,7 @@ ColdWatch:
 A cloud-based cold chain temperature monitoring system built with Docker, Flask, MySQL, and AWS SNS.
 
 Architecture:
-Python Simulator → Flask REST API → MySQL Database → AWS SNS Email Alerts
+Python Simulator → Flask REST API → MySQL Database → AWS SNS Email Alerts;
 PHP Dashboard ← Flask REST API
 
 Tech Stack:
