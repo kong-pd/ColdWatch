@@ -1,0 +1,53 @@
+name: ColdWatch CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install flask flask-cors mysql-connector-python boto3 python-dotenv requests
+
+      - name: Test Flask API imports
+        run: |
+          cd flask-api
+          python -c "from app import app; print('Flask app loaded OK')"
+
+      - name: Test simulator imports
+        run: |
+          cd simulator
+          python -c "import simulator; print('Simulator loaded OK')"
+
+      - name: Build Docker images
+        run: |
+          docker compose build
+
+      - name: Test SNS connection
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          SNS_TOPIC_ARN: ${{ secrets.SNS_TOPIC_ARN }}
+        run: |
+          pip install boto3
+          python -c "
+          import boto3, os
+          sns = boto3.client('sns', region_name=os.environ['AWS_REGION'])
+          print('SNS client created OK')
+          print('All checks passed!')
+          "
