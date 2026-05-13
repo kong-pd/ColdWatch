@@ -1,0 +1,49 @@
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: coldwatch-mysql
+    env_file: .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: coldwatch
+      MYSQL_USER: coldwatch
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./mysql-init/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  flask-api:
+    build: ./flask-api
+    container_name: coldwatch-flask
+    env_file: .env
+    ports:
+      - "5000:5000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  simulator:
+    build: ./simulator
+    container_name: coldwatch-simulator
+    env_file: .env
+    depends_on:
+      - flask-api
+
+  php-app:
+    build: ./php-app
+    container_name: coldwatch-php
+    ports:
+      - "8080:80"
+    depends_on:
+      - flask-api
+
+volumes:
+  mysql_data:
