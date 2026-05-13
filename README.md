@@ -1,4 +1,4 @@
-ColdWatch:
+ColdWatch,
 A cloud-based cold chain temperature monitoring system built with Docker, Flask, MySQL, and AWS SNS.
 
 Architecture:
