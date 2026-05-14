@@ -1,4 +1,14 @@
 <?php
+session_start();
+if (!isset($_SESSION['user'])) {
+    header('Location: login.php');
+    exit;
+}
+$user = $_SESSION['user'];
+$isAdmin = $user['role'] === 'admin';
+?>
+
+<?php
 // PHP 职责：只负责输出 HTML 结构
 ?>
 <!DOCTYPE html>
@@ -14,6 +24,12 @@
   <h1> ColdWatch</h1>
   <span>Cold Chain Temperature Monitoring System</span>
 </header>
+<div style="background:#1e293b;padding:10px 40px;display:flex;justify-content:space-between;align-items:center;font-size:0.85rem;">
+  <span style="color:#94a3b8;">Logged in as <strong style="color:#60a5fa;"><?= htmlspecialchars($user['username']) ?></strong>
+  <span style="background:#1e3a5f;color:#93c5fd;padding:2px 10px;border-radius:99px;margin-left:8px;"><?= $user['role'] ?></span>
+  </span>
+  <a href="logout.php" style="color:#f87171;text-decoration:none;">Logout</a>
+</div>
 
 <div class="container">
 

@@ -126,5 +126,32 @@ def get_alerts():
     db.close()
     return jsonify(rows)
 
+import bcrypt
+
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
+
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+    user = cursor.fetchone()
+    cursor.close()
+    db.close()
+
+    if not user:
+        return jsonify({"error": "Invalid credentials"}), 401
+
+    if bcrypt.checkpw(password.encode(), user["password_hash"].encode()):
+        return jsonify({
+            "user_id": user["user_id"],
+            "username": user["username"],
+            "role": user["role"]
+        }), 200
+    else:
+        return jsonify({"error": "Invalid credentials"}), 401
+    
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
