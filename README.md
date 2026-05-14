@@ -25,6 +25,7 @@ Instant email alerts via AWS SNS
 Live dashboard with auto-refresh every 10 seconds
 Fully containerized with Docker Compose
 CI pipeline via GitHub Actions: import checks, Docker build verification, AWS connectivity test
+Role-based access control with session management (admin / operator)
 
 Quick Start:
 Prerequisites: Docker Desktop, Git
