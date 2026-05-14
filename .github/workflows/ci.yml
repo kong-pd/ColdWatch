@@ -21,7 +21,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install flask flask-cors mysql-connector-python boto3 python-dotenv requests
+          pip install flask flask-cors mysql-connector-python boto3 python-dotenv requests bcrypt
 
       - name: Test Flask API imports
         run: |
