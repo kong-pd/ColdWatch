@@ -1,4 +1,4 @@
-# ColdWatch ❄️
+# ColdWatch
 
 > A cloud-based cold chain temperature monitoring system — real-time sensor tracking, automatic breach detection, and instant email alerts via AWS SNS.
 
@@ -15,7 +15,7 @@
 ## Screenshots
 
 <!-- Add screenshots after running the app -->
-<!-- ![Dashboard](./docs/screenshots/dashboard.png) -->
+<!-- ![Dashboard](.dashboard.png) -->
 
 ---
 
