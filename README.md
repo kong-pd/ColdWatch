@@ -14,8 +14,7 @@
 
 ## Screenshots
 
-<!-- Add screenshots after running the app -->
-<!-- ![Dashboard](.dashboard.png) -->
+<!-- ![Dashboard](./Dashboard.png) -->
 
 ---
 
