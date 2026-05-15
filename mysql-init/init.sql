@@ -1,8 +1,8 @@
--- ColdWatch 数据库初始化脚本
+-- ColdWatch database initialization script
 CREATE DATABASE IF NOT EXISTS coldwatch;
 USE coldwatch;
 
--- 传感器注册表
+-- Sensor registry
 CREATE TABLE sensors (
     sensor_id   INT PRIMARY KEY AUTO_INCREMENT,
     sensor_name VARCHAR(100) NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE sensors (
     created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- 温度记录
+-- Temperature readings
 CREATE TABLE temperature_readings (
     reading_id  INT PRIMARY KEY AUTO_INCREMENT,
     sensor_id   INT NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE temperature_readings (
     INDEX idx_sensor_time (sensor_id, recorded_at DESC)
 );
 
--- 告警日志
+-- Alert logs
 CREATE TABLE alert_logs (
     alert_id         INT PRIMARY KEY AUTO_INCREMENT,
     sensor_id        INT NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE alert_logs (
     FOREIGN KEY (sensor_id) REFERENCES sensors(sensor_id)
 );
 
--- 用户表
+-- Users
 CREATE TABLE users (
     user_id       INT PRIMARY KEY AUTO_INCREMENT,
     username      VARCHAR(50) UNIQUE NOT NULL,
@@ -44,8 +44,15 @@ CREATE TABLE users (
     created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- 插入测试传感器
+-- Seed: test sensors
 INSERT INTO sensors (sensor_name, location, min_temp, max_temp) VALUES
 ('Sensor-A', 'Warehouse Zone A', 2.00, 8.00),
 ('Sensor-B', 'Warehouse Zone B', 2.00, 8.00),
 ('Sensor-C', 'Cold Storage Room', -5.00, 0.00);
+
+-- Seed: test users (bcrypt cost=12)
+-- admin   / admin123
+-- operator / operator123
+INSERT INTO users (username, password_hash, role) VALUES
+('admin',    '$2b$12$sUwLEr9d1Qqi0sYQygPnpuw0o3UAod.4sx2EThOm/UUM1I3eFxfBu', 'admin'),
+('operator', '$2b$12$VYx7QQ4HaPoWsasZ4V2ZJug8kEHV6HpZAA2wfMGQZ93q1B5P5WZ3S', 'operator');
