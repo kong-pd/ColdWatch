@@ -2,7 +2,7 @@
 
 Cold chain compliance requires continuous temperature monitoring and breach
 logging across food safety and pharmaceutical supply chains. ColdWatch
-automates the pipeline — sensor ingestion, threshold detection, and instant
+automates the pipeline: sensor ingestion, threshold detection, and instant
 email alerts via AWS SNS.
 
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
