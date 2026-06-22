@@ -1,88 +1,61 @@
 # ColdWatch
 
-> A cloud-based cold chain temperature monitoring system — real-time sensor tracking, automatic breach detection, and instant email alerts via AWS SNS.
+Cold chain compliance requires continuous temperature monitoring and breach
+logging across food safety and pharmaceutical supply chains. ColdWatch
+automates the pipeline — sensor ingestion, threshold detection, and instant
+email alerts via AWS SNS.
 
-![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)
-![Flask](https://img.shields.io/badge/Flask-3.0-black?logo=flask)
-![MySQL](https://img.shields.io/badge/MySQL-8.0-orange?logo=mysql)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)
-![AWS SNS](https://img.shields.io/badge/AWS-SNS-FF9900?logo=amazonaws)
-![CI](https://img.shields.io/badge/CI-GitHub_Actions-2088FF?logo=githubactions)
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-3.0-black?logo=flask&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![AWS SNS](https://img.shields.io/badge/AWS-SNS-FF9900?logo=amazonaws&logoColor=white)
+![CI](https://img.shields.io/badge/CI-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
-
----
-
-## Screenshots
 
 ![Dashboard](./Dashboard.png)
 
 ---
 
-## Features
-
-- **Real-time monitoring** — Temperature readings from multiple sensors every 5 seconds
-- **Automatic breach detection** — Configurable HIGH/LOW thresholds per sensor
-- **Instant email alerts** — AWS SNS delivers notifications the moment a breach is detected
-- **Live dashboard** — PHP frontend auto-refreshes via JavaScript without full page reload
-- **Role-based access** — Admin and operator roles with session management
-- **Fully containerized** — Four Docker services orchestrated with Docker Compose
-- **CI pipeline** — GitHub Actions verifies imports, Docker builds, and AWS connectivity on every push
-
----
-
 ## Architecture
 
-ColdWatch follows a microservices architecture with four containerized services:
+Four Docker services orchestrated with Compose:
 
 ```
 Python Simulator
       │  POST /reading (every 5s)
       ▼
 Flask REST API ──── MySQL 8.0
-      │                 (temperature_readings, alert_logs, sensors, users)
-      │ breach detected
+      │  breach detected
       ▼
-  AWS SNS ──── Email Alert
-      
+  AWS SNS ──── Email alert
+
 PHP Dashboard ──── GET /readings, /alerts (every 5s via JS)
 ```
 
-| Service | Technology | Role |
-|---------|-----------|------|
-| `flask-api` | Python 3.11 + Flask | REST API, breach detection, SNS alerts |
-| `simulator` | Python 3.11 | Generates sensor readings (10% breach rate) |
+| Service | Stack | Role |
+|---------|-------|------|
+| `flask-api` | Python 3.11 + Flask | REST API, breach detection, SNS publish |
+| `simulator` | Python 3.11 | Generates readings every 5s (10% breach rate) |
 | `mysql` | MySQL 8.0 | Stores readings, alerts, sensors, users |
-| `php-app` | PHP 8.2 + Apache | Web dashboard with login/logout |
+| `php-app` | PHP 8.2 + Apache | Dashboard with login/logout |
 
 ---
 
-## Quick Start
+## Setup
 
-### Prerequisites
-
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-- Git
-- AWS account with SNS topic configured (for email alerts)
-
-### Installation
+Requires Docker Desktop and an AWS account with SNS configured.
 
 ```bash
-# 1. Clone the repo
 git clone https://github.com/kong-pd/coldwatch.git
 cd coldwatch
-
-# 2. Set up environment variables
 cp .env.example .env
-# Edit .env and fill in your AWS credentials and DB passwords
-
-# 3. Start all services
+# Fill in DB passwords and AWS credentials
 docker compose up --build
-
-# 4. Open the dashboard
-# http://localhost:8080
+# → http://localhost:8080
 ```
 
-### Test Accounts
+**Test accounts:**
 
 | Username | Password | Role |
 |----------|----------|------|
@@ -91,56 +64,57 @@ docker compose up --build
 
 ---
 
-## Project Structure
+## AWS SNS setup
 
-```
-coldwatch/
-├── flask-api/              # REST API (Python/Flask)
-│   ├── app.py
-│   ├── requirements.txt
-│   └── Dockerfile
-├── simulator/              # Sensor data simulator (Python)
-│   ├── simulator.py
-│   └── Dockerfile
-├── php-app/                # Web dashboard
-│   ├── index.php           # HTML structure (PHP renders shell only)
-│   ├── login.php
-│   ├── logout.php
-│   ├── style.css
-│   ├── app.js              # All API calls and DOM updates
-│   └── Dockerfile
-├── mysql-init/
-│   └── init.sql            # Schema + seed data
-├── .github/workflows/
-│   └── ci.yml              # GitHub Actions CI pipeline
-├── docker-compose.yml
-├── .env.example            # Environment variable template
-└── .env                    # (gitignored — create from .env.example)
-```
+1. SNS Console → Create topic (Standard)
+2. Create subscription → Protocol: Email → confirm via email
+3. Copy Topic ARN → `SNS_TOPIC_ARN` in `.env`
+4. IAM → create user with `SNS:Publish` permission → add credentials to `.env`
 
 ---
 
-## API Endpoints
+## API endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/reading` | Receive a sensor reading |
-| `GET` | `/readings` | Get latest 50 readings |
-| `GET` | `/alerts` | Get latest 20 alerts |
-| `POST` | `/login` | Authenticate a user |
+| `POST` | `/reading` | Ingest a sensor reading |
+| `GET` | `/readings` | Latest 50 readings |
+| `GET` | `/alerts` | Latest 20 alerts |
+| `POST` | `/login` | Authenticate user |
 
 ---
 
-## AWS SNS Setup
+## Things that will bite you
 
-1. Go to [AWS SNS Console](https://console.aws.amazon.com/sns/) → Create topic (Standard)
-2. Create a subscription → Protocol: Email → enter your email
-3. Confirm the subscription via email
-4. Copy the Topic ARN into your `.env` as `SNS_TOPIC_ARN`
-5. Create an IAM user with `SNS:Publish` permission and add the credentials to `.env`
+**MySQL healthcheck** — Flask starts before MySQL is ready without the
+`healthcheck` + `depends_on: condition: service_healthy` in
+`docker-compose.yml`. Already handled, but don't remove it.
+
+**Simulator URL** — `API_URL` in `simulator.py` uses `flask-api:5000`
+(Docker service name). If running the simulator outside Docker for testing,
+change it to `localhost:5000`.
+
+**SNS credentials** — Need both the IAM key/secret AND the Topic ARN in
+`.env`. Missing either causes a silent fail — breach gets logged to MySQL
+but the email never sends.
+
+---
+
+## Project layout
+
+```
+coldwatch/
+├── flask-api/          app.py, requirements.txt, Dockerfile
+├── simulator/          simulator.py, Dockerfile
+├── php-app/            index.php, login.php, app.js, style.css, Dockerfile
+├── mysql-init/         init.sql (schema + seed data)
+├── .github/workflows/  ci.yml
+├── docker-compose.yml
+└── .env.example
+```
 
 ---
 
 ## License
 
-MIT © [kong-pd](https://github.com/kong-pd)
+MIT
