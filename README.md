@@ -32,6 +32,7 @@ Flask REST API ──── MySQL 8.0
 
 PHP Dashboard ──── GET /readings, /alerts (every 5s via JS)
 ```
+![Architecture](ColdWatch%20System%20Architecture%20Diagram.drawio.png)
 
 | Service | Stack | Role |
 |---------|-------|------|
